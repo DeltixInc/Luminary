@@ -1,0 +1,12 @@
+/packages/
+bin/
+obj/
+.idea/
+.vs/
+.gradle/
+*.user
+*.suo
+*.iml
+*.ipr
+*.iws
+*.nupkg

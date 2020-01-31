@@ -1,0 +1,44 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>netstandard1.3;net40;net45</TargetFrameworks>
+    <LangVersion>6</LangVersion>
+    <RootNamespace>Deltix.Luminary</RootNamespace>
+    <AssemblyName>Deltix.Luminary</AssemblyName>
+    <Authors>Vitali Haravy &lt;vharavy@deltixlab.com&gt;</Authors>
+    <Company>Deltix Inc.</Company>
+    <Description>A reusable IDL framework.</Description>
+    <Copyright>Copyright (C) 2016-2017, Deltix Inc.</Copyright>
+    <PackageProjectUrl>https://gitlab.deltixhub.com/Deltix/Common/Luminary</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://gitlab.deltixhub.com/Deltix/Common/Luminary</RepositoryUrl>
+    <PackageTags>.NET IDL</PackageTags>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;1705;3021</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn>1701;1702;1705;3021</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\..\java\src\main\antlr\LuminaryLexer.g4" Link="LuminaryLexer.g4" />
+    <None Include="..\..\java\src\main\antlr\LuminaryParser.g4" Link="LuminaryParser.g4" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Antlr4" Version="4.6.4" PrivateAssets="All" />
+    <PackageReference Include="Antlr4.CodeGenerator" Version="4.6.4" PrivateAssets="All" />
+    <PackageReference Include="Antlr4.Runtime" Version="4.6.4" />
+    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" /> <!-- DO NOT CHANGE Newtonsoft.Json VERSION (It is dotnet SDK dependency) -->
+  </ItemGroup>
+  <ItemGroup>
+    <Antlr4 Include="..\..\java\src\main\antlr\LuminaryLexer.g4">
+      <Link>Luminary.g4</Link>
+      <Generator>MSBuild:Compile</Generator>
+      <CustomToolNamespace>Deltix.Luminary.Implementation</CustomToolNamespace>
+    </Antlr4>
+    <Antlr4 Include="..\..\java\src\main\antlr\LuminaryParser.g4">
+      <Link>Luminary.g4</Link>
+      <Generator>MSBuild:Compile</Generator>
+      <CustomToolNamespace>Deltix.Luminary.Implementation</CustomToolNamespace>
+    </Antlr4>
+  </ItemGroup>
+</Project>

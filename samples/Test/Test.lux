@@ -1,0 +1,20 @@
+namespace Test;
+
+interface A {
+    Int32 Id get;
+}
+
+interface B : A {
+    override Int32 Id get set;
+}
+
+class ClassA {
+    final Int32 Value;
+    final Int8 Tag = 'X';
+}
+
+class ClassB : ClassA {
+    Decimal Test = Decimal.NULL;
+    Int32 NewValue;
+}
+

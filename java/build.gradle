@@ -1,0 +1,90 @@
+apply plugin: 'java'
+apply plugin: 'antlr'
+apply plugin: 'maven-publish'
+
+allprojects {
+    apply from: "$rootDir/gradle/Deltix.gradle"
+}
+
+sourceCompatibility = 1.7
+
+sourceSets {
+    demo {
+        java {
+            compileClasspath += main.output
+            runtimeClasspath += main.output
+            srcDir file('src/demo/java')
+        }
+        resources.srcDir file('src/demo/resources')
+    }
+}
+
+configurations {
+    demoCompile.extendsFrom compile
+    demoRuntime.extendsFrom runtime
+}
+
+repositories {
+    mavenCentral()
+    mavenDeltix("Deltix.Java")
+    mavenDeltix("RTMath.Java")
+}
+
+dependencies {
+    antlr 'org.antlr:antlr4:4.6'
+
+    compile 'org.antlr:antlr4-runtime:4.6'
+    compile 'com.google.guava:guava:20.0'
+    compile 'com.google.code.gson:gson:2.8.0'
+    compile 'deltix:deltix-dfp:0.10.11'
+    compileOnly 'org.jetbrains:annotations-java5:18.0.0'
+
+    testCompile 'junit:junit:4.+'
+}
+
+javadoc {
+    exclude 'deltix/luminary/implementation/**'
+    exclude 'deltix/luminary/parser/**'
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+publishing {
+    repositories {
+        maven {
+            url "https://packages.deltixhub.com/maven2/${System.getenv('FEED_BASE_NAME') ?: 'Test'}.Java"
+            credentials {
+                username System.getenv('PUBLISHER_USERNAME') ?: ''
+                password System.getenv('PUBLISHER_PASSWORD') ?: ''
+            }
+        }
+    }
+
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            artifact javadocJar
+            artifact sourcesJar
+        }
+    }
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'Deltix Luminary',
+                   'Implementation-Version': version
+    }
+}
+
+generateGrammarSource {
+    arguments += ["-package", "deltix.luminary.parser"]
+    outputDirectory = file("src/main/java/deltix/luminary/parser")
+}

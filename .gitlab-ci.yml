@@ -1,0 +1,123 @@
+stages:
+    - prepare
+    - build
+    - release
+    - publish
+    - clean-up
+
+"Prepare":
+    stage: prepare
+    script:
+        - export CI_PUSH_URL=`echo $CI_REPOSITORY_URL | perl -pe 's#.*@(.+?(\:\d+)?)/#git@\1:#'`
+        - echo $CI_PUSH_URL
+        - git config user.name "Robot"
+        - git config user.email "<internal@rtmath.net>"
+        - git checkout -b pipeline-$CI_PIPELINE_ID
+        - ./gradlew prepareReleaseVersion
+        - git commit -am "[Skip CI] Generate release version"
+        - ./gradlew prepareSnapshotVersion
+        - git commit -am "[Skip CI] Generate next development version"
+        - git remote set-url --push origin "${CI_PUSH_URL}"
+        - git push origin -u pipeline-$CI_PIPELINE_ID
+    tags:
+        - Linux
+        - ShellExecutor
+    only:
+        - /^release-.*$/
+    except:
+        - tags
+
+"Build: Java":
+    stage: build
+    image: packages.deltixhub.com:443/gitlabci.docker/open-jdk-7-gradle-4.1:latest
+    script:
+        - git checkout origin/pipeline-$CI_PIPELINE_ID~1 || true
+        - ./gradlew :deltix-luminary:build
+    artifacts:
+        paths:
+            - java/build/libs/
+    tags:
+        - Linux
+        - DockerExecutor
+    except:
+        - tags
+
+"Build .NET":
+    stage: build
+    image: microsoft/dotnet
+    script:
+        - git checkout origin/pipeline-$CI_PIPELINE_ID~1; if (-not $?) { cmd.exe /c "exit 0" }
+        - cd csharp
+        - ./build -Target Build
+    tags:
+        - Windows
+    except:
+        - tags
+
+"Release":
+    stage: release
+    script:
+        - export CI_PUSH_URL=`echo $CI_REPOSITORY_URL | perl -pe 's#.*@(.+?(\:\d+)?)/#git@\1:#'`
+        - git config user.name "Robot"
+        - git config user.email "<internal@rtmath.net>"
+        - git remote set-url --push origin "${CI_PUSH_URL}"
+        - git checkout origin/pipeline-$CI_PIPELINE_ID~1
+        - ./gradlew pushVersion
+        - git checkout pipeline-$CI_PIPELINE_ID
+        - git push origin origin/pipeline-$CI_PIPELINE_ID:${CI_BUILD_REF_NAME}
+    tags:
+        - Linux
+        - ShellExecutor
+    only:
+        - /^release-.*$/
+    except:
+        - tags
+
+"Publish: Java":
+    stage: publish
+    image: packages.deltixhub.com:443/gitlabci.docker/open-jdk-7-gradle-4.1:latest
+    script:
+        - git checkout origin/pipeline-$CI_PIPELINE_ID~1
+        - ./gradlew :deltix-luminary:publish
+    dependencies:
+        - "Build: Java"
+    only:
+        - /^release-.*$/
+    tags:
+        - Linux
+        - DockerExecutor
+    except:
+        - tags
+
+"Publish .NET":
+    stage: publish
+    script:
+        - git checkout origin/pipeline-$CI_PIPELINE_ID~1; if (-not $?) { cmd.exe /c "exit 0" }
+        - cd csharp
+        - ./build -Target Push
+    dependencies:
+        - "Build .NET"
+    only:
+        - /^release-.*$/
+    tags:
+        - Windows
+    except:
+        - tags
+
+"Clean Up":
+    stage: clean-up
+    script:
+        - export CI_PUSH_URL=`echo $CI_REPOSITORY_URL | perl -pe 's#.*@(.+?(\:\d+)?)/#git@\1:#'`
+        - git config user.name "Robot"
+        - git config user.email "<internal@rtmath.net>"
+        - git remote set-url --push origin "${CI_PUSH_URL}"
+        - git push origin --delete pipeline-$CI_PIPELINE_ID
+    only:
+        - /^release-.*$/
+    when: always
+    tags:
+        - Linux
+        - ShellExecutor
+    except:
+        - tags
+
