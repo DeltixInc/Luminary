@@ -27,7 +27,7 @@
     <PackageReference Include="Antlr4" Version="4.6.4" PrivateAssets="All" />
     <PackageReference Include="Antlr4.CodeGenerator" Version="4.6.4" PrivateAssets="All" />
     <PackageReference Include="Antlr4.Runtime" Version="4.6.4" />
-    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" /> <!-- DO NOT CHANGE Newtonsoft.Json VERSION (It is dotnet SDK dependency) -->
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" /> <!-- DO NOT CHANGE Newtonsoft.Json VERSION (It is dotnet SDK dependency) -->
   </ItemGroup>
   <ItemGroup>
     <Antlr4 Include="..\..\java\src\main\antlr\LuminaryLexer.g4">
